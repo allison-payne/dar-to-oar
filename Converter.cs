@@ -1,4 +1,6 @@
 ﻿using DARtoOAR.OARStructures;
+using DARtoOAR.OARStructures.Conditions;
+using DARtoOAR.OARStructures.Values;
 using DARtoOAR.Utils;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -23,28 +25,82 @@ namespace DARtoOAR
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
-        private static Condition parseCondition(string condition)
-        {
-            string[] conditionSet = condition.Trim().Split(new string[] { "(", ")" }, StringSplitOptions.RemoveEmptyEntries);
-            MessageBox.Show(condition);
-            string conditionName = conditionSet[0];
-            float conditionValue = float.Parse(conditionSet[1]);
-            Condition cond = new Condition()
-            {
-                requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
-                condition = conditionName,
-                negated = false,
 
+        private static PluginValue GetPluginValue(string condition)
+        {
+            string[] conditionSplit = condition.Split('|', StringSplitOptions.TrimEntries);
+            return new PluginValue()
+            {
+                pluginName = conditionSplit[0].Replace("\"", ""),
+                formID = conditionSplit[1].Substring(2).TrimStart('0')
             };
-            if (conditionName.Equals("Random"))
+        }
+
+        private static Condition parseCondition(string condition, bool isNegated = false)
+        {
+            var splitIndex = condition.LastIndexOf(" ");
+            string conditionToParse = condition;
+            string conjunction = "";
+            if (splitIndex > 0)
             {
-                cond.Comparison = "<=";
-                cond.randomValue = new RandomValue() { min = 0, max = 1 };
-                cond.numericValue = new NumericValue() { value = conditionValue };
+                conditionToParse = condition.Substring(0, splitIndex);
+                conjunction = condition.Substring(splitIndex + 1, condition.Length - splitIndex - 1);
             }
-            if (conditionName.Equals("IsMovementDirection"))
+            string[] conditionSet = conditionToParse.Split(new string[] { "(", ")" }, StringSplitOptions.RemoveEmptyEntries);     
+            string conditionName = conditionSet[0];
+            Condition cond = new Condition();
+            switch (conditionName)
             {
-                cond.numericValue = new NumericValue() { value = conditionValue };
+                case "Random":
+                    cond = new RandomCondition()
+                    {
+                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
+                        condition = conditionName,
+                        negated = isNegated,
+                        Comparison = "<=",
+                        randomValue = new RandomValue() { min = 0, max = 1 },
+                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
+                    };
+                    break;
+                case "IsActorBase":
+                    cond = new IsActorBase()
+                    {
+                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
+                        condition = conditionName,
+                        negated = isNegated,
+                        actorBase = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "IsInCombat":
+                    cond = new Condition()
+                    {
+                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
+                        condition = conditionName,
+                        negated = isNegated,
+                    };
+                    break;
+                case "IsEquippedRightType":
+                case "IsEquippedLeftType":
+                    cond = new IsEquippedType
+                    {
+                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
+                        condition = "IsEquippedType",
+                        negated = isNegated,
+                        leftHand = conditionName.Equals("IsEquippedLeftType"),
+                        typeValue = new TypeValue() { value = float.Parse(conditionSet[1]) }
+                    };
+                    break;
+                case "IsMovementDirection":
+                    cond = new NumericComparison()
+                    {
+                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
+                        condition = conditionName,
+                        negated = isNegated,
+                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
+                    };
+                    break;
+                default:
+                    break;
             }
 
             return cond;
@@ -54,22 +110,27 @@ namespace DARtoOAR
             List<Condition> result = new List<Condition>();
             foreach (string condition in conditions)
             {
+                string cleaned = condition;
+                bool isNegated = false;
+
                 if (condition.StartsWith("AND"))
                 {
-                    string cleaned = condition.Split(' ', 2)[1].Trim();
-                    MessageBox.Show(cleaned);
+                    cleaned = condition.Split(' ', 2)[1].Trim();
                     result.Add(parseCondition(cleaned));
                 }
                 else if (condition.StartsWith("OR"))
                 {
-                    string cleaned = condition.Split(' ', 2)[1].Trim();
+                    cleaned = condition.Split(' ', 2)[1].Trim();
                     MessageBox.Show(cleaned);
                 }
-                else
-                {
-                    result.Add(parseCondition(condition));
 
+                if (cleaned.StartsWith("NOT"))
+                {
+                    isNegated = true;
+                    cleaned = cleaned.Split(' ', 2)[1].Trim();
                 }
+                result.Add(parseCondition(cleaned, isNegated));
+
 
             }
             return result;
@@ -131,7 +192,7 @@ namespace DARtoOAR
             };
             // TODO: Add some better error handling here.
             await using FileStream createStream = File.Create($"{conditionsFolder}\\{CONFIG_FILE_NAME}");
-            await JsonSerializer.SerializeAsync(createStream, config, serializerOptions);
+            await JsonSerializer.SerializeAsync<object>(createStream, config, serializerOptions);
             conditionsFile.Delete();
         }
         private static void ConvertConditions(List<DirectoryInfo> oarConditionsFolders)
