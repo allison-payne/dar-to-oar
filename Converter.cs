@@ -1,0 +1,155 @@
+﻿using DARtoOAR.OARStructures;
+using DARtoOAR.Utils;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace DARtoOAR
+{
+    internal class Converter
+    {
+        private static string ACTOR_FOLDER_PATH = @"meshes\actors\";
+        private static string ANIMATION_FOLDER_PATH = @"\animations\";
+        private static string DAR_FOLDER = "DynamicAnimationReplacer";
+        private static string DAR_CONDITIONS_FOLDER = "_CustomConditions";
+        private static string OAR_FOLDER = "OpenAnimationReplacer";
+        private static string DAR_CONDITIONS_FILE_NAME = "_conditions.txt";
+        private static string CONFIG_FILE_NAME = "config.json";
+        private static string CONFIG_FILE_DEFAULT_VERSION = "1.0.0.0";
+
+        private static JsonSerializerOptions serializerOptions = new()
+        {
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
+        private static Condition parseCondition(string condition)
+        {
+            string[] conditionSet = condition.Trim().Split(new string[] { "(", ")" }, StringSplitOptions.RemoveEmptyEntries);
+            MessageBox.Show(condition);
+            string conditionName = conditionSet[0];
+            float conditionValue = float.Parse(conditionSet[1]);
+            Condition cond = new Condition()
+            {
+                requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
+                condition = conditionName,
+                negated = false,
+
+            };
+            if (conditionName.Equals("Random"))
+            {
+                cond.Comparison = "<=";
+                cond.randomValue = new RandomValue() { min = 0, max = 1 };
+                cond.numericValue = new NumericValue() { value = conditionValue };
+            }
+            if (conditionName.Equals("IsMovementDirection"))
+            {
+                cond.numericValue = new NumericValue() { value = conditionValue };
+            }
+
+            return cond;
+        }
+        private static List<Condition> parseConditions(string[] conditions)
+        {
+            List<Condition> result = new List<Condition>();
+            foreach (string condition in conditions)
+            {
+                if (condition.StartsWith("AND"))
+                {
+                    string cleaned = condition.Split(' ', 2)[1].Trim();
+                    MessageBox.Show(cleaned);
+                    result.Add(parseCondition(cleaned));
+                }
+                else if (condition.StartsWith("OR"))
+                {
+                    string cleaned = condition.Split(' ', 2)[1].Trim();
+                    MessageBox.Show(cleaned);
+                }
+                else
+                {
+                    result.Add(parseCondition(condition));
+
+                }
+
+            }
+            return result;
+        }
+        private static async Task<DirectoryInfo> GenerateMainConfigFile(DirectoryInfo darActorFolder, DirectoryInfo oarModFolder, string? modName, string? author = "")
+        {
+
+            MainConfig mc = new MainConfig()
+            {
+                author = author,
+                name = String.IsNullOrEmpty(modName) ? oarModFolder.Name : modName,
+                description = ""
+            };
+
+            string oarModPath = $"{oarModFolder.FullName}\\{ACTOR_FOLDER_PATH}\\{darActorFolder.Name}\\{ANIMATION_FOLDER_PATH}\\{OAR_FOLDER}\\{mc.name}";
+            string filePath = $"{oarModPath}\\{CONFIG_FILE_NAME}";
+            FileInfo configFileInfo = new FileInfo(filePath);
+            if (configFileInfo.Directory != null)
+            {
+                configFileInfo.Directory.Create();
+            }
+
+            // TODO: Add some better error handling here.
+            await using FileStream createStream = File.Create(filePath);
+            await JsonSerializer.SerializeAsync(createStream, mc, serializerOptions);
+            return new DirectoryInfo(oarModPath);
+        }
+        private static async Task<List<DirectoryInfo>> BuildOARDirectories(DirectoryInfo oarModFolder, string darModFolder, string? modName, string? modAuthor)
+        {
+            DirectoryInfo darDirectoryInfo = new DirectoryInfo(darModFolder);
+            DirectoryInfo[] darActorFolders = darDirectoryInfo.GetDirectories(ACTOR_FOLDER_PATH);
+
+            List<DirectoryInfo> animationsDirectories = new List<DirectoryInfo>();
+            foreach (DirectoryInfo darActorFolder in darActorFolders)
+            {
+                DirectoryInfo oarAnimationsFolder = await GenerateMainConfigFile(darActorFolder, oarModFolder, modName, modAuthor);
+                animationsDirectories.Add(oarAnimationsFolder);
+                DirectoryInfo darConditionsFolder = new DirectoryInfo($"{darActorFolder.FullName}\\{ANIMATION_FOLDER_PATH}\\{DAR_FOLDER}\\{DAR_CONDITIONS_FOLDER}");
+                DirectoryUtils.CopyDirectory(darConditionsFolder, oarAnimationsFolder, true);
+            }
+            return animationsDirectories;
+        }
+        private static async void GenerateConditionsConfigFile(FileInfo conditionsFile)
+        {
+            // TODO: Add some better error handling here.
+            Int32 priority = conditionsFile.Directory != null ? Int32.Parse(conditionsFile.Directory.Name) : 0;
+            string name = conditionsFile.Directory != null ? conditionsFile.Directory.Name : "";
+            string conditionsFolder = conditionsFile.DirectoryName != null ? conditionsFile.DirectoryName : "";
+
+            string[] conditions = File.ReadAllLines(conditionsFile.FullName);
+            List<Condition> conditionsList = parseConditions(conditions);
+            ConditionsConfig config = new ConditionsConfig()
+            {
+                name = name,
+                priority = priority,
+                description = "",
+                overrideAnimationsFolder = "",
+                conditions = conditionsList.ToArray()
+            };
+            // TODO: Add some better error handling here.
+            await using FileStream createStream = File.Create($"{conditionsFolder}\\{CONFIG_FILE_NAME}");
+            await JsonSerializer.SerializeAsync(createStream, config, serializerOptions);
+            conditionsFile.Delete();
+        }
+        private static void ConvertConditions(List<DirectoryInfo> oarConditionsFolders)
+        {
+            foreach (DirectoryInfo directory in oarConditionsFolders)
+            {
+                FileInfo[] conditionsFiles = directory.GetFiles(DAR_CONDITIONS_FILE_NAME, SearchOption.AllDirectories);
+                foreach (FileInfo conditionsFile in conditionsFiles)
+                {
+                    GenerateConditionsConfigFile(conditionsFile);
+                }
+            }
+        }
+        public static async void convertDARtoOAR(string darModFolder, string oarModFolderPath, string? modName, string? modAuthor)
+        {
+            DirectoryInfo oarModFolder = new DirectoryInfo(oarModFolderPath);
+            List<DirectoryInfo> directories = await BuildOARDirectories(oarModFolder, darModFolder, modName, modAuthor);
+            ConvertConditions(directories);
+        }
+    }
+}
