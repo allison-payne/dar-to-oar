@@ -8,10 +8,9 @@ using System.Threading.Tasks;
 
 namespace DARtoOAR.OARStructures.Conditions
 {
-    internal class EquippedHasKeyword: Condition
+    internal class HasMagicEffect : Condition
     {
-        public FormValue? Keyword { get; set; }
-        [JsonPropertyName("Left hand")]
-        public bool leftHand { get; set; }
+        [JsonPropertyName("Magic effect")]
+        public PluginValue magicEffect { get; set; }
     }
 }

@@ -2,6 +2,8 @@
 using DARtoOAR.OARStructures.Conditions;
 using DARtoOAR.OARStructures.Values;
 using DARtoOAR.Utils;
+using Microsoft.Extensions.Logging;
+using NLog;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -26,6 +28,7 @@ namespace DARtoOAR
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
+        private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
         private static PluginValue GetPluginValue(string condition)
         {
             string[] conditionSplit = condition.Split('|', StringSplitOptions.TrimEntries);
@@ -35,7 +38,6 @@ namespace DARtoOAR
                 formID = conditionSplit[1].Substring(2).TrimStart('0')
             };
         }
-
         private static Condition parseCondition(string condition, bool isNegated = false)
         {
             var splitIndex = condition.LastIndexOf(" ");
@@ -46,9 +48,10 @@ namespace DARtoOAR
                 conditionToParse = condition.Substring(0, splitIndex);
                 conjunction = condition.Substring(splitIndex + 1, condition.Length - splitIndex - 1);
             }
-            string[] conditionSet = conditionToParse.Split(new string[] { "(", ")" }, StringSplitOptions.RemoveEmptyEntries);     
+            string[] conditionSet = conditionToParse.Split(new string[] { "(", ")" }, StringSplitOptions.RemoveEmptyEntries);
             string conditionName = conditionSet[0];
             Condition cond = new Condition();
+            LOGGER.Debug($"Parsing condition: {conditionName}");
             switch (conditionName)
             {
                 case "Random":
@@ -71,14 +74,7 @@ namespace DARtoOAR
                         actorBase = GetPluginValue(conditionSet[1])
                     };
                     break;
-                case "IsInCombat":
-                    cond = new Condition()
-                    {
-                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
-                        condition = conditionName,
-                        negated = isNegated,
-                    };
-                    break;
+
                 case "IsEquippedRightType":
                 case "IsEquippedLeftType":
                     cond = new IsEquippedType
@@ -88,6 +84,28 @@ namespace DARtoOAR
                         negated = isNegated,
                         leftHand = conditionName.Equals("IsEquippedLeftType"),
                         typeValue = new TypeValue() { value = float.Parse(conditionSet[1]) }
+                    };
+                    break;
+                case "IsEquippedHasKeyword":
+                    cond = new EquippedHasKeyword
+                    {
+                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
+                        condition = conditionName,
+                        negated = isNegated,
+                        leftHand = conditionName.Equals("IsEquippedLeftType"),
+                        Keyword = new FormValue()
+                        {
+                            Form = GetPluginValue(conditionSet[1])
+                        }
+                    };
+                    break;
+                case "HasMagicEffect":
+                    cond = new HasMagicEffect()
+                    {
+                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
+                        condition = conditionName,
+                        negated = isNegated,
+                        magicEffect = GetPluginValue(conditionSet[1])
                     };
                     break;
                 case "IsMovementDirection":
@@ -100,9 +118,15 @@ namespace DARtoOAR
                     };
                     break;
                 default:
+                    LOGGER.Warn($"Condition({conditionName}) has no value. This can intentional, or it can due to an as yet umapped condition.");
+                    cond = new Condition()
+                    {
+                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
+                        condition = conditionName,
+                        negated = isNegated,
+                    };
                     break;
             }
-
             return cond;
         }
         private static List<Condition> parseConditions(string[] conditions)
