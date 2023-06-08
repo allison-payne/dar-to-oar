@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DARtoOAR.Utils
+﻿namespace DARtoOAR.Utils
 {
     internal class DirectoryUtils
     {
@@ -25,7 +19,7 @@ namespace DARtoOAR.Utils
             foreach (FileInfo file in sourceDir.GetFiles())
             {
                 string targetFilePath = Path.Combine(destinationDir.FullName, file.Name);
-                file.CopyTo(targetFilePath);
+                file.CopyTo(targetFilePath, true);
             }
 
             // If recursive and copying subdirectories, recursively call this method

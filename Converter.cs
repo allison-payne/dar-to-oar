@@ -2,7 +2,6 @@
 using DARtoOAR.OARStructures.Conditions;
 using DARtoOAR.OARStructures.Values;
 using DARtoOAR.Utils;
-using Microsoft.Extensions.Logging;
 using NLog;
 using System.Text.Encodings.Web;
 using System.Text.Json;
