@@ -73,7 +73,15 @@ namespace DARtoOAR
                         actorBase = GetPluginValue(conditionSet[1])
                     };
                     break;
-
+                case "IsInFaction":
+                    cond = new IsInFaction()
+                    {
+                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
+                        condition = conditionName,
+                        negated = isNegated,
+                        Faction = GetPluginValue(conditionSet[1])
+                    };
+                    break;
                 case "IsEquippedRightType":
                 case "IsEquippedLeftType":
                     cond = new IsEquippedType
@@ -98,15 +106,6 @@ namespace DARtoOAR
                         }
                     };
                     break;
-                case "HasMagicEffect":
-                    cond = new HasMagicEffect()
-                    {
-                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
-                        condition = conditionName,
-                        negated = isNegated,
-                        magicEffect = GetPluginValue(conditionSet[1])
-                    };
-                    break;
                 case "IsMovementDirection":
                     cond = new NumericComparison()
                     {
@@ -116,8 +115,26 @@ namespace DARtoOAR
                         numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
                     };
                     break;
+                case "HasMagicEffect":
+                    cond = new HasMagicEffect()
+                    {
+                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
+                        condition = conditionName,
+                        negated = isNegated,
+                        magicEffect = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "CurrentWeather":
+                    cond = new CurrentWeather()
+                    {
+                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
+                        condition = conditionName,
+                        negated = isNegated,
+                        Weather = GetPluginValue(conditionSet[1])
+                    };
+                    break;
                 default:
-                    LOGGER.Warn($"Condition({conditionName}) has no value. This can intentional, or it can due to an as yet umapped condition.");
+                    LOGGER.Warn($"Condition({conditionName}) has no value. This can be intentional, or it can be due to an as yet umapped condition.");
                     cond = new Condition()
                     {
                         requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
@@ -204,6 +221,7 @@ namespace DARtoOAR
             string conditionsFolder = conditionsFile.DirectoryName != null ? conditionsFile.DirectoryName : "";
 
             string[] conditions = File.ReadAllLines(conditionsFile.FullName);
+            LOGGER.Info($"Parsing conditions at path: {conditionsFile.DirectoryName}");
             List<Condition> conditionsList = parseConditions(conditions);
             ConditionsConfig config = new ConditionsConfig()
             {
