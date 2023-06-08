@@ -1,4 +1,4 @@
-# DAR-to-OAR
+# DAR-to-OAR [![.NET](https://github.com/allison-payne/dar-to-oar/actions/workflows/dotnet.yml/badge.svg)](https://github.com/allison-payne/dar-to-oar/actions/workflows/dotnet.yml)
 A Tool for automating the conversion DAR mods to OAR mods.
 
 ## What it does
