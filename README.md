@@ -12,6 +12,6 @@ This tool converts a DAR mod to an OAR mod. It copies all the files from the ``D
 
 ## Still todo
 
-- Complete the conditions list
-- Error handling
-- User messaging
+- Complete the conditions mapping
+- Additional Error handling 
+- Additonal User messaging
