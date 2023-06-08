@@ -44,7 +44,8 @@ namespace DARtoOAR
             {
                 Converter.convertDARtoOAR(darModFolderPath.Text, oarModFolderPath.Text, modName.Text, modAuthor.Text);
                 MessageBox.Show("Conversion successful!");
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 LOGGER.Error(ex);
             }
