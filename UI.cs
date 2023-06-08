@@ -1,10 +1,12 @@
 using DARtoOAR.Components;
+using NLog;
 
 namespace DARtoOAR
 {
     public partial class UI : Form
     {
-        private const string DEFAULT_FOLDER_PATH = @"c:\Users";
+        private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
+        private static string DEFAULT_FOLDER_PATH = @"c:\Users";
 
         public UI()
         {
@@ -38,7 +40,14 @@ namespace DARtoOAR
 
         private void convertBtn_Click(object sender, EventArgs e)
         {
-            Converter.convertDARtoOAR(darModFolderPath.Text, oarModFolderPath.Text, modName.Text, modAuthor.Text);
+            try
+            {
+                Converter.convertDARtoOAR(darModFolderPath.Text, oarModFolderPath.Text, modName.Text, modAuthor.Text);
+                MessageBox.Show("Conversion successful!");
+            }catch(Exception ex)
+            {
+                LOGGER.Error(ex);
+            }
         }
 
         private void darModFolderPath_TextChanged(object sender, EventArgs e)
