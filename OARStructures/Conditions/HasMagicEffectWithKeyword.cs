@@ -10,6 +10,6 @@ namespace DARtoOAR.OARStructures.Conditions
 {
     internal class HasMagicEffectWithKeyword : Condition
     {
-        public FormValue? Keyword { get; set; }
+        public KeywordValue? Keyword { get; set; }
     }
 }

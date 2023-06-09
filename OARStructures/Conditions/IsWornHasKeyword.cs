@@ -10,6 +10,6 @@ namespace DARtoOAR.OARStructures.Conditions
 {
     internal class IsWornHasKeyword : Condition
     {
-        public FormValue? Keyword { get; set; }
+        public KeywordValue? Keyword { get; set; }
     }
 }

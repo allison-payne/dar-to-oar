@@ -10,7 +10,7 @@ namespace DARtoOAR.OARStructures.Conditions
 {
     internal class IsEquippedHasKeyword: Condition
     {
-        public FormValue? Keyword { get; set; }
+        public KeywordValue? Keyword { get; set; }
         [JsonPropertyName("Left hand")]
         public bool leftHand { get; set; }
     }

@@ -6,6 +6,5 @@
         public string? condition { get; set; }
         public string requiredVersion { get; set; } = CONFIG_FILE_DEFAULT_VERSION;
         public bool negated { get; set; } = false;
-        public bool keepRandomResultsOnLoop { get; set; } = true;
     }
 }

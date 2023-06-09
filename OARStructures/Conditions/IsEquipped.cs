@@ -11,7 +11,7 @@ namespace DARtoOAR.OARStructures.Conditions
     internal class IsEquipped: Condition
     {
         // TODO Verify Property Name
-        public FormValue? Keyword { get; set; }
+        public PluginValue? Form { get; set; }
         [JsonPropertyName("Left hand")]
         public bool leftHand { get; set; }
     }

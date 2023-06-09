@@ -15,5 +15,7 @@ namespace DARtoOAR.OARStructures.Conditions
         public string? Comparison { get; set; }
         [JsonPropertyName("Numeric value")]
         public NumericValue? numericValue { get; set; }
+
+        public bool keepRandomResultsOnLoop { get; set; } = true;
     }
 }
