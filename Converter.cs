@@ -198,7 +198,7 @@ namespace DARtoOAR
             await JsonSerializer.SerializeAsync(createStream, mc, serializerOptions);
             return new DirectoryInfo(oarModPath);
         }
-        private static async Task<List<DirectoryInfo>> BuildOARDirectories(DirectoryInfo oarModFolder, string darModFolder, string? modName, string? modAuthor)
+        private static async Task<List<DirectoryInfo>> BuildOARDirectories(DirectoryInfo oarModFolder, string darModFolder, bool overwrite, string? modName, string? modAuthor)
         {
             DirectoryInfo darDirectoryInfo = new DirectoryInfo(darModFolder);
             DirectoryInfo[] darActorFolders = darDirectoryInfo.GetDirectories(ACTOR_FOLDER_PATH);
@@ -209,7 +209,7 @@ namespace DARtoOAR
                 DirectoryInfo oarAnimationsFolder = await GenerateMainConfigFile(darActorFolder, oarModFolder, modName, modAuthor);
                 animationsDirectories.Add(oarAnimationsFolder);
                 DirectoryInfo darConditionsFolder = new DirectoryInfo($"{darActorFolder.FullName}\\{ANIMATION_FOLDER_PATH}\\{DAR_FOLDER}\\{DAR_CONDITIONS_FOLDER}");
-                DirectoryUtils.CopyDirectory(darConditionsFolder, oarAnimationsFolder, true);
+                DirectoryUtils.CopyDirectory(darConditionsFolder, oarAnimationsFolder, overwrite, true);
             }
             return animationsDirectories;
         }
@@ -250,7 +250,7 @@ namespace DARtoOAR
         public static async void convertDARtoOAR(string darModFolder, string oarModFolderPath, string? modName, string? modAuthor)
         {
             DirectoryInfo oarModFolder = new DirectoryInfo(oarModFolderPath);
-            List<DirectoryInfo> directories = await BuildOARDirectories(oarModFolder, darModFolder, modName, modAuthor);
+            List<DirectoryInfo> directories = await BuildOARDirectories(oarModFolder, darModFolder, true, modName, modAuthor);
             ConvertConditions(directories);
         }
     }

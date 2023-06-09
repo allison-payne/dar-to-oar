@@ -2,27 +2,20 @@
 {
     internal class DirectoryUtils
     {
-        public static void CopyDirectory(DirectoryInfo sourceDir, DirectoryInfo destinationDir, bool recursive)
+        public static void CopyDirectory(DirectoryInfo sourceDir, DirectoryInfo destinationDir, bool overwrite, bool recursive = false)
         {
-
-            // Check if the source directory exists
             if (!sourceDir.Exists)
                 throw new DirectoryNotFoundException($"Source directory not found: {sourceDir.FullName}");
 
-            // Cache directories before we start copying
             DirectoryInfo[] dirs = sourceDir.GetDirectories();
-
-            // Create the destination directory
             Directory.CreateDirectory(destinationDir.FullName);
 
-            // Get the files in the source directory and copy to the destination directory
             foreach (FileInfo file in sourceDir.GetFiles())
             {
                 string targetFilePath = Path.Combine(destinationDir.FullName, file.Name);
-                file.CopyTo(targetFilePath, true);
+                file.CopyTo(targetFilePath, overwrite);
             }
 
-            // If recursive and copying subdirectories, recursively call this method
             if (recursive)
             {
                 foreach (DirectoryInfo subDir in dirs)

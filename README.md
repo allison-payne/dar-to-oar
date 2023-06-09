@@ -10,8 +10,7 @@ This tool converts a DAR mod to an OAR mod. It copies all the files from the ``D
 2. After Step 1, you can customize the OAR output folder and/or the OAR Mod name used in the OAR config.json
 3. Click Convert.
 
-## Still todo
-
-- Complete the conditions mapping
+## TODO
+- Complete the [conditions mapping](Checklist.md)
 - Additional Error handling 
 - Additonal User messaging
