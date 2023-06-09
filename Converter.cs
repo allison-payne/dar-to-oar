@@ -6,6 +6,7 @@ using NLog;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Windows.Forms;
 
 namespace DARtoOAR
 {
@@ -37,9 +38,23 @@ namespace DARtoOAR
                 formID = conditionSplit[1].Substring(2).TrimStart('0')
             };
         }
+        private static KeywordValue GetKeywordValue(string condition)
+        {
+            // only PluginValue for DAR conversion
+            string[] conditionSplit = condition.Split("|", StringSplitOptions.TrimEntries);
+            return new KeywordValue()
+            {
+                form = new PluginValue()
+                {
+                    pluginName = conditionSplit[0].Replace("\"", ""),
+                    formID = conditionSplit[1].Substring(2).TrimStart('0')
+                }
+            };
+        }
+
         private static Condition parseCondition(string condition, bool isNegated = false)
         {
-            var splitIndex = condition.LastIndexOf(" ");
+            var splitIndex = condition.IndexOf(")");
             string conditionToParse = condition;
             string conjunction = "";
             if (splitIndex > 0)
@@ -50,7 +65,7 @@ namespace DARtoOAR
             string[] conditionSet = conditionToParse.Split(new string[] { "(", ")" }, StringSplitOptions.RemoveEmptyEntries);
             string conditionName = conditionSet[0];
             Condition cond;
-            LOGGER.Debug($"Parsing -> condition: {conditionName} value: {conditionSet[1]}");
+            LOGGER.Debug($"Parsing -> condition: {conditionName}");
             switch (conditionName)
             {
                 case "Random":
@@ -96,9 +111,20 @@ namespace DARtoOAR
                         condition = conditionName,
                         negated = isNegated,
                         leftHand = conditionName.Equals("IsEquippedLeftHasKeyword"),
-                        Keyword = new FormValue()
+                        Keyword = new KeywordValue()
                         {
-                            Form = GetPluginValue(conditionSet[1])
+                            form = GetKeywordValue(conditionSet[1]).form
+                        }
+                    };
+                    break;
+                case "HasKeyword":
+                    cond = new HasKeyword
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Keyword = new KeywordValue()
+                        {
+                            form = GetKeywordValue(conditionSet[1]).form
                         }
                     };
                     break;
@@ -118,6 +144,17 @@ namespace DARtoOAR
                         magicEffect = GetPluginValue(conditionSet[1])
                     };
                     break;
+                case "HasMagicEffectWithKeyword":
+                    cond = new HasMagicEffectWithKeyword
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Keyword = new KeywordValue()
+                        {
+                            form = GetKeywordValue(conditionSet[1]).form
+                        }
+                    };
+                    break;
                 case "CurrentWeather":
                     cond = new CurrentWeather()
                     {
@@ -126,8 +163,107 @@ namespace DARtoOAR
                         Weather = GetPluginValue(conditionSet[1])
                     };
                     break;
+                case "IsInLocation":
+                    cond = new IsInLocation()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Location = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "IsWorn":
+                    cond = new IsWorn()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Form = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "IsWornHasKeyword":
+                    cond = new IsWornHasKeyword()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Keyword = new KeywordValue()
+                        {
+                            form = GetKeywordValue(conditionSet[1]).form
+                        }
+                    };
+                    break;
+                case "HasPerk":
+                    cond = new HasPerk()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Perk = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "HasSpell":
+                    cond = new HasSpell()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Spell = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "IsRace":
+                    cond = new IsRace()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Race = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "IsClass":
+                    cond = new IsClass()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Class = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "IsCombatStyle":
+                    cond = new IsCombatStyle()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        CombatStyle = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "IsVoiceType":
+                    cond = new IsVoiceType()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        VoiceType = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "HasRefType":
+                    cond = new HasRefType()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        LocationRefType = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "IsParentCell":
+                    cond = new IsParentCell()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Cell = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "IsWorldSpace":
+                    cond = new IsWorldSpace()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Worldspace = GetPluginValue(conditionSet[1])
+                    };
+                    break;
                 default:
-                    LOGGER.Warn($"Condition({conditionName}) has no explicit mapping and was parsed with the following value {conditionSet[1]}.");
+                    LOGGER.Warn($"Condition({conditionName}) has no explicit mapping.");
                     cond = new Condition()
                     {
                         condition = conditionName,
@@ -142,24 +278,13 @@ namespace DARtoOAR
             List<Condition> result = new List<Condition>();
             foreach (string condition in conditions)
             {
-                string cleaned = condition;
+                string cleaned = condition.Replace(" ", "");
                 bool isNegated = false;
-
-                if (condition.StartsWith("AND"))
-                {
-                    cleaned = condition.Split(' ', 2)[1].Trim();
-                    result.Add(parseCondition(cleaned));
-                }
-                else if (condition.StartsWith("OR"))
-                {
-                    cleaned = condition.Split(' ', 2)[1].Trim();
-                    MessageBox.Show(cleaned);
-                }
 
                 if (cleaned.StartsWith("NOT"))
                 {
                     isNegated = true;
-                    cleaned = cleaned.Split(' ', 2)[1].Trim();
+                    cleaned = cleaned.Replace("NOT", "");
                 }
                 result.Add(parseCondition(cleaned, isNegated));
 

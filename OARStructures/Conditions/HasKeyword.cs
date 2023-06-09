@@ -2,8 +2,8 @@
 
 namespace DARtoOAR.OARStructures.Conditions
 {
-    internal class HasKeyword:Condition
+    internal class HasKeyword : Condition
     {
-        public FormValue? Keyword { get; set; }
+        public KeywordValue? Keyword { get; set; }
     }
 }
