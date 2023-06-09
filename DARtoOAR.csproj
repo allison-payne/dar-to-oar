@@ -15,7 +15,7 @@
     <ApplicationIcon>Assets\kayak-clipart-md.ico</ApplicationIcon>
     <PackageIcon>kayak-clipart-md.png</PackageIcon>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <Version>0.1.4</Version>
+    <Version>0.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
