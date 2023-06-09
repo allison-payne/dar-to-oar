@@ -41,14 +41,9 @@ namespace DARtoOAR
         private static KeywordValue GetKeywordValue(string condition)
         {
             // only PluginValue for DAR conversion
-            string[] conditionSplit = condition.Split("|", StringSplitOptions.TrimEntries);
             return new KeywordValue()
             {
-                form = new PluginValue()
-                {
-                    pluginName = conditionSplit[0].Replace("\"", ""),
-                    formID = conditionSplit[1].Substring(2).TrimStart('0')
-                }
+                form = GetPluginValue(condition)
             };
         }
 
@@ -111,10 +106,7 @@ namespace DARtoOAR
                         condition = conditionName,
                         negated = isNegated,
                         leftHand = conditionName.Equals("IsEquippedLeftHasKeyword"),
-                        Keyword = new KeywordValue()
-                        {
-                            form = GetKeywordValue(conditionSet[1]).form
-                        }
+                        Keyword = GetKeywordValue(conditionSet[1])
                     };
                     break;
                 case "HasKeyword":
@@ -122,10 +114,7 @@ namespace DARtoOAR
                     {
                         condition = conditionName,
                         negated = isNegated,
-                        Keyword = new KeywordValue()
-                        {
-                            form = GetKeywordValue(conditionSet[1]).form
-                        }
+                        Keyword = GetKeywordValue(conditionSet[1])
                     };
                     break;
                 case "IsMovementDirection":
@@ -149,10 +138,7 @@ namespace DARtoOAR
                     {
                         condition = conditionName,
                         negated = isNegated,
-                        Keyword = new KeywordValue()
-                        {
-                            form = GetKeywordValue(conditionSet[1]).form
-                        }
+                        Keyword = GetKeywordValue(conditionSet[1])
                     };
                     break;
                 case "CurrentWeather":
@@ -184,10 +170,7 @@ namespace DARtoOAR
                     {
                         condition = conditionName,
                         negated = isNegated,
-                        Keyword = new KeywordValue()
-                        {
-                            form = GetKeywordValue(conditionSet[1]).form
-                        }
+                        Keyword = GetKeywordValue(conditionSet[1])
                     };
                     break;
                 case "HasPerk":
@@ -344,8 +327,6 @@ namespace DARtoOAR
             {
                 name = name,
                 priority = priority,
-                description = "",
-                overrideAnimationsFolder = "",
                 conditions = conditionsList.ToArray()
             };
             // TODO: Add some better error handling here.
