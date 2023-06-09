@@ -11,10 +11,11 @@
     <PackageProjectUrl></PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/allison-payne/dar-to-oar</RepositoryUrl>
-    <AssemblyVersion>0.1.3</AssemblyVersion>
+    <AssemblyVersion></AssemblyVersion>
     <ApplicationIcon>Assets\kayak-clipart-md.ico</ApplicationIcon>
     <PackageIcon>kayak-clipart-md.png</PackageIcon>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <Version>0.1.4</Version>
   </PropertyGroup>
 
   <ItemGroup>

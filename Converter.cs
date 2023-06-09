@@ -18,7 +18,7 @@ namespace DARtoOAR
         private static string OAR_FOLDER = "OpenAnimationReplacer";
         private static string DAR_CONDITIONS_FILE_NAME = "_conditions.txt";
         private static string CONFIG_FILE_NAME = "config.json";
-        private static string CONFIG_FILE_DEFAULT_VERSION = "1.0.0.0";
+  
 
         private static JsonSerializerOptions serializerOptions = new()
         {
@@ -30,7 +30,7 @@ namespace DARtoOAR
         private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
         private static PluginValue GetPluginValue(string condition)
         {
-            string[] conditionSplit = condition.Split('|', StringSplitOptions.TrimEntries);
+            string[] conditionSplit = condition.Split("|", StringSplitOptions.TrimEntries);
             return new PluginValue()
             {
                 pluginName = conditionSplit[0].Replace("\"", ""),
@@ -49,14 +49,13 @@ namespace DARtoOAR
             }
             string[] conditionSet = conditionToParse.Split(new string[] { "(", ")" }, StringSplitOptions.RemoveEmptyEntries);
             string conditionName = conditionSet[0];
-            Condition cond = new Condition();
-            LOGGER.Debug($"Parsing condition: {conditionName}");
+            Condition cond;
+            LOGGER.Debug($"Parsing -> condition: {conditionName} value: {conditionSet[1]}");
             switch (conditionName)
             {
                 case "Random":
                     cond = new RandomCondition()
                     {
-                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
                         condition = conditionName,
                         negated = isNegated,
                         Comparison = "<=",
@@ -67,7 +66,6 @@ namespace DARtoOAR
                 case "IsActorBase":
                     cond = new IsActorBase()
                     {
-                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
                         condition = conditionName,
                         negated = isNegated,
                         actorBase = GetPluginValue(conditionSet[1])
@@ -76,7 +74,6 @@ namespace DARtoOAR
                 case "IsInFaction":
                     cond = new IsInFaction()
                     {
-                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
                         condition = conditionName,
                         negated = isNegated,
                         Faction = GetPluginValue(conditionSet[1])
@@ -86,20 +83,19 @@ namespace DARtoOAR
                 case "IsEquippedLeftType":
                     cond = new IsEquippedType
                     {
-                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
                         condition = "IsEquippedType",
                         negated = isNegated,
                         leftHand = conditionName.Equals("IsEquippedLeftType"),
                         typeValue = new TypeValue() { value = float.Parse(conditionSet[1]) }
                     };
                     break;
-                case "IsEquippedHasKeyword":
-                    cond = new EquippedHasKeyword
+                case "IsEquippedRightHasKeyword":
+                case "IsEquippedLeftHasKeyword":
+                    cond = new IsEquippedHasKeyword
                     {
-                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
                         condition = conditionName,
                         negated = isNegated,
-                        leftHand = conditionName.Equals("IsEquippedLeftType"),
+                        leftHand = conditionName.Equals("IsEquippedLeftHasKeyword"),
                         Keyword = new FormValue()
                         {
                             Form = GetPluginValue(conditionSet[1])
@@ -109,7 +105,6 @@ namespace DARtoOAR
                 case "IsMovementDirection":
                     cond = new NumericComparison()
                     {
-                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
                         condition = conditionName,
                         negated = isNegated,
                         numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
@@ -118,7 +113,6 @@ namespace DARtoOAR
                 case "HasMagicEffect":
                     cond = new HasMagicEffect()
                     {
-                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
                         condition = conditionName,
                         negated = isNegated,
                         magicEffect = GetPluginValue(conditionSet[1])
@@ -127,17 +121,15 @@ namespace DARtoOAR
                 case "CurrentWeather":
                     cond = new CurrentWeather()
                     {
-                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
                         condition = conditionName,
                         negated = isNegated,
                         Weather = GetPluginValue(conditionSet[1])
                     };
                     break;
                 default:
-                    LOGGER.Warn($"Condition({conditionName}) has no value. This can be intentional, or it can be due to an as yet umapped condition.");
+                    LOGGER.Warn($"Condition({conditionName}) has no explicit mapping and was parsed with the following value {conditionSet[1]}.");
                     cond = new Condition()
                     {
-                        requiredVersion = CONFIG_FILE_DEFAULT_VERSION,
                         condition = conditionName,
                         negated = isNegated,
                     };

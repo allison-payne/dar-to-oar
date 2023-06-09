@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DARtoOAR.OARStructures.Conditions
 {
-    internal class EquippedHasKeyword: Condition
+    internal class IsEquippedHasKeyword: Condition
     {
         public FormValue? Keyword { get; set; }
         [JsonPropertyName("Left hand")]
