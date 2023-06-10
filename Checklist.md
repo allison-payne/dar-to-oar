@@ -3,22 +3,25 @@
 
 ### TODO
 - OR Conditons Nesting
-- IsActorValueEqualTo(GlobalVariable id, GlobalVariable value)
-- IsActorValueLessThan(GlobalVariable id, GlobalVariable value)
 - IsActorValueBaseEqualTo(GlobalVariable id, GlobalVariable value)
 - IsActorValueBaseLessThan(GlobalVariable id, GlobalVariable value)
 - IsActorValueMaxEqualTo(GlobalVariable id, GlobalVariable value)
 - IsActorValueMaxLessThan(GlobalVariable id, GlobalVariable value)
 - IsActorValuePercentageEqualTo(GlobalVariable id, GlobalVariable value)
 - IsActorValuePercentageLessThan(GlobalVariable id, GlobalVariable value)
-- IsLevelLessThan(GlobalVariable level)
-- CurrentGameTimeLessThan(GlobalVariable time)
 - ValueEqualTo(GlobalVariable value1, GlobalVariable value2)
 - ValueLessThan(GlobalVariable value1, GlobalVariable value2)
-- IsFactionRankEqualTo(GlobalVariable rank, Faction faction)
-- IsFactionRankLessThan(GlobalVariable rank, Faction faction)
+
+These "should" be correct, but I am still not certain on the structure. 
+- IsActorValueEqualTo(GlobalVariable id, GlobalVariable value)
+- IsActorValueLessThan(GlobalVariable id, GlobalVariable value)
+
 
 ### Completed
+- ~~IsLevelLessThan(GlobalVariable level)~~
+- ~~CurrentGameTimeLessThan(GlobalVariable time)~~
+- ~~IsFactionRankEqualTo(GlobalVariable rank, Faction faction)~~
+- ~~IsFactionRankLessThan(GlobalVariable rank, Faction faction)~~
 - ~~IsEquippedRight(Form item)~~
 - ~~IsEquippedRightType(GlobalVariable type)~~
 - ~~IsEquippedRightHasKeyword(Keyword keyword)~~
