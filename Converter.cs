@@ -60,6 +60,7 @@ namespace DARtoOAR
             string[] conditionSet = conditionToParse.Split(new string[] { "(", ")" }, StringSplitOptions.RemoveEmptyEntries);
             string conditionName = conditionSet[0];
             Condition cond;
+            string[] values;
             LOGGER.Debug($"Parsing -> condition: {conditionName}");
             switch (conditionName)
             {
@@ -123,6 +124,78 @@ namespace DARtoOAR
                         condition = conditionName,
                         negated = isNegated,
                         numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
+                    };
+                    break;
+                case "CurrentGameTimeLessThan":
+                    cond = new NumericComparison()
+                    {
+                        condition = "CurrentGameTime",
+                        negated = isNegated,
+                        Comparison = "<=",
+                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
+                    };
+                    break;
+                case "IsLevelLessThan":
+                    cond = new NumericComparison()
+                    {
+                        condition = "Level",
+                        negated = isNegated,
+                        Comparison = "<=",
+                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
+                    };
+                    break;
+                case "IsFactionRankEqualTo":
+                    cond = new FactionRank()
+                    {
+                        condition = "FactionRank",
+                        negated = isNegated,
+                        Faction = new PluginValue()
+                        {
+
+                        },
+                        Comparison = "==",
+                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
+                    };
+                    break;
+                case "IsFactionRankLessThan":
+                    cond = new FactionRank()
+                    {
+                        condition = "FactionRank",
+                        negated = isNegated,
+                        Faction = new PluginValue()
+                        {
+
+                        },
+                        Comparison = "<=",
+                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
+                    };
+                    break;
+                case "IsActorValueEqualTo":
+                    values = conditionSet[1].Split(',');
+                    cond = new CompareValues()
+                    {
+                        condition = "CompareValues",
+                        negated = isNegated,
+                        valueA = new ActorValue()
+                        {
+                            actorValue = int.Parse(values[0]),
+                        },
+                        Comparison = "==",
+                        valueB = new NumericValue() { value = float.Parse(values[1]) }
+                    };
+                    break;
+                case "IsActorValueLessThan":
+                    values = conditionSet[1].Split(',');
+                    cond = new CompareValues()
+                    {
+                        condition = "CompareValues",
+                        negated = isNegated,
+                        valueA = new ActorValue()
+                        {
+                            actorValue = int.Parse(values[0]),
+                        },
+                        Comparison = "<=",
+                        valueB = new NumericValue() { value = float.Parse(values[1]) }
                     };
                     break;
                 case "HasMagicEffect":
