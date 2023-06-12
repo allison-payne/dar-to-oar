@@ -48,15 +48,7 @@ namespace DARtoOAR
         }
         private static Condition parseCondition(string condition, bool isNegated = false)
         {
-            var splitIndex = condition.IndexOf(")");
-            string conditionToParse = condition;
-            string conjunction = "";
-            if (splitIndex > 0)
-            {
-                conditionToParse = condition.Substring(0, splitIndex);
-                conjunction = condition.Substring(splitIndex + 1, condition.Length - splitIndex - 1);
-            }
-            string[] conditionSet = conditionToParse.Split(new string[] { "(", ")" }, StringSplitOptions.RemoveEmptyEntries);
+            string[] conditionSet = condition.Split(new string[] { "(", ")" }, StringSplitOptions.RemoveEmptyEntries);
             string conditionName = conditionSet[0];
             Condition cond;
             string[] values;
@@ -439,6 +431,7 @@ namespace DARtoOAR
         private static List<Condition> parseConditions(string[] conditions)
         {
             List<Condition> result = new List<Condition>();
+            List<Condition>? orConditions = null;
             OR? or = null;
             foreach (string condition in conditions)
             {
@@ -446,8 +439,9 @@ namespace DARtoOAR
                 bool isNegated = false;
                 if (cleaned.EndsWith("OR"))
                 {
-                    if (or == null)
+                    if (or == null && orConditions == null)
                     {
+                        orConditions = new List<Condition>();
                         or = new OR();
                         result.Add(or);
                     }
@@ -455,17 +449,21 @@ namespace DARtoOAR
                 }
                 else
                 {
+                    if (or != null && orConditions != null)
+                    {
+                        or.conditions = orConditions.ToArray();
+                    }
                     or = null;
+                    orConditions = null;
                 }
                 if (cleaned.StartsWith("NOT"))
                 {
                     isNegated = true;
                     cleaned = cleaned.Replace("NOT", "");
-
                 }
-                if (or != null)
+                if (or != null && orConditions != null)
                 {
-                    or.conditions.Add(parseCondition(cleaned, isNegated));
+                    orConditions.Add(parseCondition(cleaned, isNegated));
                 }
                 else
                 {
@@ -514,10 +512,10 @@ namespace DARtoOAR
             List<DirectoryInfo> animationsDirectories = new List<DirectoryInfo>();
             foreach (DirectoryInfo darActorFolder in darActorFolders)
             {
-                
+
                 if (darActorFolder.GetDirectories("_1stperson").Length > 0)
                 {
-                    string oar1stPersonConfigPath = Path.Combine(ACTOR_FOLDER, darActorFolder.Name, FIRST_PERSON_FOLDER,ANIMATION_FOLDER, OAR_FOLDER);
+                    string oar1stPersonConfigPath = Path.Combine(ACTOR_FOLDER, darActorFolder.Name, FIRST_PERSON_FOLDER, ANIMATION_FOLDER, OAR_FOLDER);
                     DirectoryInfo oarAnimations1stPersonFolder = await BuildOARDirectory(darActorFolder, oarModFolder, oar1stPersonConfigPath, true, modName, modAuthor);
                     animationsDirectories.Add(oarAnimations1stPersonFolder);
                 }

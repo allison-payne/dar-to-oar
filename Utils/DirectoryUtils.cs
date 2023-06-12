@@ -21,7 +21,7 @@
                 foreach (DirectoryInfo subDir in dirs)
                 {
                     string newDestinationDir = Path.Combine(destinationDir.FullName, subDir.Name);
-                    CopyDirectory(subDir, new DirectoryInfo(newDestinationDir), true);
+                    CopyDirectory(subDir, new DirectoryInfo(newDestinationDir), true, true);
                 }
             }
         }
