@@ -12,8 +12,9 @@ namespace DARtoOAR
 {
     internal class Converter
     {
-        private static string ACTOR_FOLDER_PATH = @"meshes\actors\";
-        private static string ANIMATION_FOLDER_PATH = @"\animations\";
+        private static string ACTOR_FOLDER = @"meshes\actors";
+        private static string FIRST_PERSON_FOLDER = "_1stperson";
+        private static string ANIMATION_FOLDER = "animations";
         private static string DAR_FOLDER = "DynamicAnimationReplacer";
         private static string DAR_CONDITIONS_FOLDER = "_CustomConditions";
         private static string OAR_FOLDER = "OpenAnimationReplacer";
@@ -443,9 +444,10 @@ namespace DARtoOAR
             {
                 string cleaned = condition.Replace(" ", "");
                 bool isNegated = false;
-                if(cleaned.EndsWith("OR"))
+                if (cleaned.EndsWith("OR"))
                 {
-                    if(or == null) { 
+                    if (or == null)
+                    {
                         or = new OR();
                         result.Add(or);
                     }
@@ -459,9 +461,9 @@ namespace DARtoOAR
                 {
                     isNegated = true;
                     cleaned = cleaned.Replace("NOT", "");
-                    
+
                 }
-                if(or != null)
+                if (or != null)
                 {
                     or.conditions.Add(parseCondition(cleaned, isNegated));
                 }
@@ -469,22 +471,22 @@ namespace DARtoOAR
                 {
                     result.Add(parseCondition(cleaned, isNegated));
                 }
-                
+
             }
             return result;
         }
-        private static async Task<DirectoryInfo> GenerateMainConfigFile(DirectoryInfo darActorFolder, DirectoryInfo oarModFolder, string? modName, string? author = "")
+        private static async Task<DirectoryInfo> GenerateMainConfigFile(DirectoryInfo darActorFolder, DirectoryInfo oarModFolder, string oarConfigPath, string? modName, string? author = "")
         {
 
             MainConfig mc = new MainConfig()
             {
                 author = author,
-                name = String.IsNullOrEmpty(modName) ? oarModFolder.Name : modName,
+                name = $"{(String.IsNullOrEmpty(modName) ? oarModFolder.Name : modName)}-{darActorFolder.Name}",
                 description = ""
             };
 
-            string oarModPath = $"{oarModFolder.FullName}\\{ACTOR_FOLDER_PATH}\\{darActorFolder.Name}\\{ANIMATION_FOLDER_PATH}\\{OAR_FOLDER}\\{mc.name}";
-            string filePath = $"{oarModPath}\\{CONFIG_FILE_NAME}";
+            string oarModPath = Path.Combine(oarModFolder.FullName, oarConfigPath, mc.name);
+            string filePath = Path.Combine(oarModPath, CONFIG_FILE_NAME);
             FileInfo configFileInfo = new FileInfo(filePath);
             if (configFileInfo.Directory != null)
             {
@@ -498,15 +500,25 @@ namespace DARtoOAR
         }
         private static async Task<List<DirectoryInfo>> BuildOARDirectories(DirectoryInfo oarModFolder, string darModFolder, bool overwrite, string? modName, string? modAuthor)
         {
-            DirectoryInfo darDirectoryInfo = new DirectoryInfo(darModFolder);
-            DirectoryInfo[] darActorFolders = darDirectoryInfo.GetDirectories(ACTOR_FOLDER_PATH);
+            DirectoryInfo darDirectoryInfo = new DirectoryInfo(Path.Combine(darModFolder, "meshes", "actors"));
+            DirectoryInfo[] darActorFolders = darDirectoryInfo.GetDirectories();
 
             List<DirectoryInfo> animationsDirectories = new List<DirectoryInfo>();
             foreach (DirectoryInfo darActorFolder in darActorFolders)
             {
-                DirectoryInfo oarAnimationsFolder = await GenerateMainConfigFile(darActorFolder, oarModFolder, modName, modAuthor);
+                string oarConfigPath = Path.Combine(ACTOR_FOLDER, darActorFolder.Name, ANIMATION_FOLDER, OAR_FOLDER);
+                /*                if (darActorFolder.GetDirectories("_1stperson").Length > 0)
+                                {
+                                    oarConfigPath = $"{ACTOR_FOLDER}{darActorFolder.Name}{FIRST_PERSON_FOLDER}{ANIMATION_FOLDER}{OAR_FOLDER}";
+
+                                }
+                                else
+                                {
+
+                                }*/
+                DirectoryInfo oarAnimationsFolder = await GenerateMainConfigFile(darActorFolder, oarModFolder, oarConfigPath, modName, modAuthor);
                 animationsDirectories.Add(oarAnimationsFolder);
-                DirectoryInfo darConditionsFolder = new DirectoryInfo($"{darActorFolder.FullName}\\{ANIMATION_FOLDER_PATH}\\{DAR_FOLDER}\\{DAR_CONDITIONS_FOLDER}");
+                DirectoryInfo darConditionsFolder = new DirectoryInfo(Path.Combine(darActorFolder.FullName, ANIMATION_FOLDER, DAR_FOLDER, DAR_CONDITIONS_FOLDER));
                 DirectoryUtils.CopyDirectory(darConditionsFolder, oarAnimationsFolder, overwrite, true);
             }
             return animationsDirectories;
@@ -528,7 +540,7 @@ namespace DARtoOAR
                 conditions = conditionsList.ToArray()
             };
             // TODO: Add some better error handling here.
-            await using FileStream createStream = File.Create($"{conditionsFolder}\\{CONFIG_FILE_NAME}");
+            await using FileStream createStream = File.Create(Path.Combine(conditionsFolder, CONFIG_FILE_NAME));
             await JsonSerializer.SerializeAsync<object>(createStream, config, serializerOptions);
             conditionsFile.Delete();
         }
