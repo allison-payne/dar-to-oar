@@ -518,7 +518,7 @@ namespace DARtoOAR
             string name = conditionsFile.Directory != null ? conditionsFile.Directory.Name : "";
             string conditionsFolder = conditionsFile.DirectoryName != null ? conditionsFile.DirectoryName : "";
 
-            string[] conditions = File.ReadAllLines(conditionsFile.FullName);
+            string[] conditions = File.ReadAllLines(conditionsFile.FullName).Where(arg => !string.IsNullOrWhiteSpace(arg)).ToArray();
             LOGGER.Info($"Parsing conditions at path: {conditionsFile.DirectoryName}");
             List<Condition> conditionsList = parseConditions(conditions);
             ConditionsConfig config = new ConditionsConfig()
