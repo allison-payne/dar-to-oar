@@ -5,12 +5,13 @@ A Tool for automating the conversion DAR mods to OAR mods.
 
 This tool converts a DAR mod to an OAR mod. It copies all the files from the ``DynamicAnimationReplacer`` folder to the ``OpenAnimationReplacer`` folder, then generates the JSON files needed at each level. To keep things simple, the numbered folders of preserved, this also makes determining priority in config generation much easier.
 
+For a list of supported DAR conditions see this [list](Checklist.md)
+
 ## How to use
 1. Simply provide the mod folder you wish to convert and add an optional author name.
 2. After Step 1, you can customize the OAR output folder and/or the OAR Mod name used in the OAR config.json
 3. Click Convert.
 
 ## TODO
-- Complete the [conditions mapping](Checklist.md)
 - Additional Error handling 
 - Additonal User messaging

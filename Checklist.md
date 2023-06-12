@@ -2,22 +2,20 @@
 ## This is the list of available conditions in DAR according the [nexus](https://www.nexusmods.com/skyrimspecialedition/mods/33746).
 
 ### TODO
-- OR Conditons Nesting
-- IsActorValueBaseEqualTo(GlobalVariable id, GlobalVariable value)
-- IsActorValueBaseLessThan(GlobalVariable id, GlobalVariable value)
-- IsActorValueMaxEqualTo(GlobalVariable id, GlobalVariable value)
-- IsActorValueMaxLessThan(GlobalVariable id, GlobalVariable value)
-- IsActorValuePercentageEqualTo(GlobalVariable id, GlobalVariable value)
-- IsActorValuePercentageLessThan(GlobalVariable id, GlobalVariable value)
-- ValueEqualTo(GlobalVariable value1, GlobalVariable value2)
-- ValueLessThan(GlobalVariable value1, GlobalVariable value2)
-
-These "should" be correct, but I am still not certain on the structure. 
-- IsActorValueEqualTo(GlobalVariable id, GlobalVariable value)
-- IsActorValueLessThan(GlobalVariable id, GlobalVariable value)
 
 
 ### Completed
+- ~~OR Conditons Nesting~~
+- ~~IsActorValueBaseEqualTo(GlobalVariable id, GlobalVariable value)~~
+- ~~IsActorValueBaseLessThan(GlobalVariable id, GlobalVariable value)~~
+- ~~IsActorValueMaxEqualTo(GlobalVariable id, GlobalVariable value)~~
+- ~~IsActorValueMaxLessThan(GlobalVariable id, GlobalVariable value)~~
+- ~~IsActorValuePercentageEqualTo(GlobalVariable id, GlobalVariable value)~~
+- ~~IsActorValuePercentageLessThan(GlobalVariable id, GlobalVariable value)~~
+- ~~ValueEqualTo(GlobalVariable value1, GlobalVariable value2)~~
+- ~~ValueLessThan(GlobalVariable value1, GlobalVariable value2)~~
+- ~~IsActorValueEqualTo(GlobalVariable id, GlobalVariable value)~~
+- ~~IsActorValueLessThan(GlobalVariable id, GlobalVariable value)~~
 - ~~IsLevelLessThan(GlobalVariable level)~~
 - ~~CurrentGameTimeLessThan(GlobalVariable time)~~
 - ~~IsFactionRankEqualTo(GlobalVariable rank, Faction faction)~~
