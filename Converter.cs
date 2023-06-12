@@ -498,6 +498,14 @@ namespace DARtoOAR
             await JsonSerializer.SerializeAsync(createStream, mc, serializerOptions);
             return new DirectoryInfo(oarModPath);
         }
+        private static async Task<DirectoryInfo> BuildOARDirectory(DirectoryInfo darActorFolder, DirectoryInfo oarModFolder, string oarConfigPath, bool overwrite, string? modName, string? modAuthor)
+        {
+            DirectoryInfo oarAnimationsFolder = await GenerateMainConfigFile(darActorFolder, oarModFolder, oarConfigPath, modName, modAuthor);
+            DirectoryInfo darConditionsFolder = new DirectoryInfo(Path.Combine(darActorFolder.FullName, ANIMATION_FOLDER, DAR_FOLDER, DAR_CONDITIONS_FOLDER));
+            DirectoryUtils.CopyDirectory(darConditionsFolder, oarAnimationsFolder, overwrite, true);
+
+            return oarAnimationsFolder;
+        }
         private static async Task<List<DirectoryInfo>> BuildOARDirectories(DirectoryInfo oarModFolder, string darModFolder, bool overwrite, string? modName, string? modAuthor)
         {
             DirectoryInfo darDirectoryInfo = new DirectoryInfo(Path.Combine(darModFolder, "meshes", "actors"));
@@ -506,20 +514,17 @@ namespace DARtoOAR
             List<DirectoryInfo> animationsDirectories = new List<DirectoryInfo>();
             foreach (DirectoryInfo darActorFolder in darActorFolders)
             {
+                
+                if (darActorFolder.GetDirectories("_1stperson").Length > 0)
+                {
+                    string oar1stPersonConfigPath = Path.Combine(ACTOR_FOLDER, darActorFolder.Name, FIRST_PERSON_FOLDER,ANIMATION_FOLDER, OAR_FOLDER);
+                    DirectoryInfo oarAnimations1stPersonFolder = await BuildOARDirectory(darActorFolder, oarModFolder, oar1stPersonConfigPath, true, modName, modAuthor);
+                    animationsDirectories.Add(oarAnimations1stPersonFolder);
+                }
+
                 string oarConfigPath = Path.Combine(ACTOR_FOLDER, darActorFolder.Name, ANIMATION_FOLDER, OAR_FOLDER);
-                /*                if (darActorFolder.GetDirectories("_1stperson").Length > 0)
-                                {
-                                    oarConfigPath = $"{ACTOR_FOLDER}{darActorFolder.Name}{FIRST_PERSON_FOLDER}{ANIMATION_FOLDER}{OAR_FOLDER}";
-
-                                }
-                                else
-                                {
-
-                                }*/
-                DirectoryInfo oarAnimationsFolder = await GenerateMainConfigFile(darActorFolder, oarModFolder, oarConfigPath, modName, modAuthor);
+                DirectoryInfo oarAnimationsFolder = await BuildOARDirectory(darActorFolder, oarModFolder, oarConfigPath, true, modName, modAuthor);
                 animationsDirectories.Add(oarAnimationsFolder);
-                DirectoryInfo darConditionsFolder = new DirectoryInfo(Path.Combine(darActorFolder.FullName, ANIMATION_FOLDER, DAR_FOLDER, DAR_CONDITIONS_FOLDER));
-                DirectoryUtils.CopyDirectory(darConditionsFolder, oarAnimationsFolder, overwrite, true);
             }
             return animationsDirectories;
         }
