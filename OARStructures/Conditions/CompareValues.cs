@@ -14,6 +14,6 @@ namespace DARtoOAR.OARStructures.Conditions
         public object? valueA { get; set; }
         public string? Comparison { get; set; }
         [JsonPropertyName("Value B")]
-        public NumericValue? valueB { get; set; }
+        public object? valueB { get; set; }
     }
 }

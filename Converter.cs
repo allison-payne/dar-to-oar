@@ -19,8 +19,8 @@ namespace DARtoOAR
         private static string OAR_FOLDER = "OpenAnimationReplacer";
         private static string DAR_CONDITIONS_FILE_NAME = "_conditions.txt";
         private static string CONFIG_FILE_NAME = "config.json";
-  
 
+        private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
         private static JsonSerializerOptions serializerOptions = new()
         {
             WriteIndented = true,
@@ -28,7 +28,6 @@ namespace DARtoOAR
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
-        private static readonly Logger LOGGER = LogManager.GetCurrentClassLogger();
         private static PluginValue GetPluginValue(string condition)
         {
             string[] conditionSplit = condition.Split("|", StringSplitOptions.TrimEntries);
@@ -46,7 +45,6 @@ namespace DARtoOAR
                 form = GetPluginValue(condition)
             };
         }
-
         private static Condition parseCondition(string condition, bool isNegated = false)
         {
             var splitIndex = condition.IndexOf(")");
@@ -64,110 +62,26 @@ namespace DARtoOAR
             LOGGER.Debug($"Parsing -> condition: {conditionName}");
             switch (conditionName)
             {
-                case "Random":
-                    cond = new RandomCondition()
+                case "ValueEqualTo":
+                    values = conditionSet[1].Split(',');
+                    cond = new CompareValues()
                     {
-                        condition = conditionName,
+                        condition = "CompareValues",
                         negated = isNegated,
-                        Comparison = "<=",
-                        randomValue = new RandomValue() { min = 0, max = 1 },
-                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
-                    };
-                    break;
-                case "IsActorBase":
-                    cond = new IsActorBase()
-                    {
-                        condition = conditionName,
-                        negated = isNegated,
-                        actorBase = GetPluginValue(conditionSet[1])
-                    };
-                    break;
-                case "IsInFaction":
-                    cond = new IsInFaction()
-                    {
-                        condition = conditionName,
-                        negated = isNegated,
-                        Faction = GetPluginValue(conditionSet[1])
-                    };
-                    break;
-                case "IsEquippedRightType":
-                case "IsEquippedLeftType":
-                    cond = new IsEquippedType
-                    {
-                        condition = "IsEquippedType",
-                        negated = isNegated,
-                        leftHand = conditionName.Equals("IsEquippedLeftType"),
-                        typeValue = new TypeValue() { value = float.Parse(conditionSet[1]) }
-                    };
-                    break;
-                case "IsEquippedRightHasKeyword":
-                case "IsEquippedLeftHasKeyword":
-                    cond = new IsEquippedHasKeyword
-                    {
-                        condition = conditionName,
-                        negated = isNegated,
-                        leftHand = conditionName.Equals("IsEquippedLeftHasKeyword"),
-                        Keyword = GetKeywordValue(conditionSet[1])
-                    };
-                    break;
-                case "HasKeyword":
-                    cond = new HasKeyword
-                    {
-                        condition = conditionName,
-                        negated = isNegated,
-                        Keyword = GetKeywordValue(conditionSet[1])
-                    };
-                    break;
-                case "IsMovementDirection":
-                    cond = new NumericComparison()
-                    {
-                        condition = conditionName,
-                        negated = isNegated,
-                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
-                    };
-                    break;
-                case "CurrentGameTimeLessThan":
-                    cond = new NumericComparison()
-                    {
-                        condition = "CurrentGameTime",
-                        negated = isNegated,
-                        Comparison = "<=",
-                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
-                    };
-                    break;
-                case "IsLevelLessThan":
-                    cond = new NumericComparison()
-                    {
-                        condition = "Level",
-                        negated = isNegated,
-                        Comparison = "<=",
-                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
-                    };
-                    break;
-                case "IsFactionRankEqualTo":
-                    cond = new FactionRank()
-                    {
-                        condition = "FactionRank",
-                        negated = isNegated,
-                        Faction = new PluginValue()
-                        {
-
-                        },
+                        valueA = GetPluginValue(values[0]),
                         Comparison = "==",
-                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
+                        valueB = new NumericValue() { value = float.Parse(values[1]) }
                     };
                     break;
-                case "IsFactionRankLessThan":
-                    cond = new FactionRank()
+                case "ValueLessThan":
+                    values = conditionSet[1].Split(',');
+                    cond = new CompareValues()
                     {
-                        condition = "FactionRank",
+                        condition = "CompareValues",
                         negated = isNegated,
-                        Faction = new PluginValue()
-                        {
-
-                        },
-                        Comparison = "<=",
-                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
+                        valueA = GetPluginValue(values[0]),
+                        Comparison = "<",
+                        valueB = new NumericValue() { value = float.Parse(values[1]) }
                     };
                     break;
                 case "IsActorValueEqualTo":
@@ -194,24 +108,165 @@ namespace DARtoOAR
                         {
                             actorValue = int.Parse(values[0]),
                         },
-                        Comparison = "<=",
+                        Comparison = "<",
                         valueB = new NumericValue() { value = float.Parse(values[1]) }
                     };
                     break;
-                case "HasMagicEffect":
-                    cond = new HasMagicEffect()
+                case "IsActorValueBaseEqualTo":
+                    values = conditionSet[1].Split(',');
+                    cond = new CompareValues()
                     {
-                        condition = conditionName,
+                        condition = "CompareValues",
                         negated = isNegated,
-                        magicEffect = GetPluginValue(conditionSet[1])
+                        valueA = new ActorValue()
+                        {
+                            actorValue = int.Parse(values[0]),
+                            actorValueType = "Base"
+                        },
+                        Comparison = "==",
+                        valueB = new NumericValue() { value = float.Parse(values[1]) }
                     };
                     break;
-                case "HasMagicEffectWithKeyword":
-                    cond = new HasMagicEffectWithKeyword
+                case "IsActorValueBaseLessThan":
+                    values = conditionSet[1].Split(',');
+                    cond = new CompareValues()
+                    {
+                        condition = "CompareValues",
+                        negated = isNegated,
+                        valueA = new ActorValue()
+                        {
+                            actorValue = int.Parse(values[0]),
+                            actorValueType = "Base"
+                        },
+                        Comparison = "<",
+                        valueB = new NumericValue() { value = float.Parse(values[1]) }
+                    };
+                    break;
+                case "IsActorValueMaxEqualTo":
+                    values = conditionSet[1].Split(',');
+                    cond = new CompareValues()
+                    {
+                        condition = "CompareValues",
+                        negated = isNegated,
+                        valueA = new ActorValue()
+                        {
+                            actorValue = int.Parse(values[0]),
+                            actorValueType = "Max"
+                        },
+                        Comparison = "==",
+                        valueB = new NumericValue() { value = float.Parse(values[1]) }
+                    };
+                    break;
+                case "IsActorValueMaxLessThan":
+                    values = conditionSet[1].Split(',');
+                    cond = new CompareValues()
+                    {
+                        condition = "CompareValues",
+                        negated = isNegated,
+                        valueA = new ActorValue()
+                        {
+                            actorValue = int.Parse(values[0]),
+                            actorValueType = "Percentage"
+                        },
+                        Comparison = "<",
+                        valueB = new NumericValue() { value = float.Parse(values[1]) }
+                    };
+                    break;
+                case "IsActorValuePercentageEqualTo":
+                    values = conditionSet[1].Split(',');
+                    cond = new CompareValues()
+                    {
+                        condition = "CompareValues",
+                        negated = isNegated,
+                        valueA = new ActorValue()
+                        {
+                            actorValue = int.Parse(values[0]),
+                            actorValueType = "Percentage"
+                        },
+                        Comparison = "==",
+                        valueB = new NumericValue() { value = float.Parse(values[1]) }
+                    };
+                    break;
+                case "IsActorValuePercentageLessThan":
+                    values = conditionSet[1].Split(',');
+                    cond = new CompareValues()
+                    {
+                        condition = "CompareValues",
+                        negated = isNegated,
+                        valueA = new ActorValue()
+                        {
+                            actorValue = int.Parse(values[0]),
+                            actorValueType = "Max"
+                        },
+                        Comparison = "<",
+                        valueB = new NumericValue() { value = float.Parse(values[1]) }
+                    };
+                    break;
+                case "IsActorBase":
+                    cond = new IsActorBase()
                     {
                         condition = conditionName,
                         negated = isNegated,
+                        actorBase = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "IsInFaction":
+                    cond = new IsInFaction()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Faction = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "IsFactionRankEqualTo":
+                    values = conditionSet[1].Split(',');
+                    cond = new FactionRank()
+                    {
+                        condition = "FactionRank",
+                        negated = isNegated,
+                        Faction = GetPluginValue(values[0]),
+                        Comparison = "==",
+                        numericValue = new NumericValue() { value = float.Parse(values[1]) }
+                    };
+                    break;
+                case "IsFactionRankLessThan":
+                    values = conditionSet[1].Split(',');
+                    cond = new FactionRank()
+                    {
+                        condition = "FactionRank",
+                        negated = isNegated,
+                        Faction = GetPluginValue(values[0]),
+                        Comparison = "<",
+                        numericValue = new NumericValue() { value = float.Parse(values[1]) }
+                    };
+                    break;
+                case "IsEquippedRightType":
+                case "IsEquippedLeftType":
+                    cond = new IsEquippedType
+                    {
+                        condition = "IsEquippedType",
+                        negated = isNegated,
+                        leftHand = conditionName.Equals("IsEquippedLeftType"),
+                        typeValue = new TypeValue() { value = float.Parse(conditionSet[1]) }
+                    };
+                    break;
+                case "IsEquippedRightHasKeyword":
+                case "IsEquippedLeftHasKeyword":
+                    cond = new IsEquippedHasKeyword
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        leftHand = conditionName.Equals("IsEquippedLeftHasKeyword"),
                         Keyword = GetKeywordValue(conditionSet[1])
+                    };
+                    break;
+                case "IsLevelLessThan":
+                    cond = new NumericComparison()
+                    {
+                        condition = "Level",
+                        negated = isNegated,
+                        Comparison = "<",
+                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
                     };
                     break;
                 case "CurrentWeather":
@@ -220,46 +275,6 @@ namespace DARtoOAR
                         condition = conditionName,
                         negated = isNegated,
                         Weather = GetPluginValue(conditionSet[1])
-                    };
-                    break;
-                case "IsInLocation":
-                    cond = new IsInLocation()
-                    {
-                        condition = conditionName,
-                        negated = isNegated,
-                        Location = GetPluginValue(conditionSet[1])
-                    };
-                    break;
-                case "IsWorn":
-                    cond = new IsWorn()
-                    {
-                        condition = conditionName,
-                        negated = isNegated,
-                        Form = GetPluginValue(conditionSet[1])
-                    };
-                    break;
-                case "IsWornHasKeyword":
-                    cond = new IsWornHasKeyword()
-                    {
-                        condition = conditionName,
-                        negated = isNegated,
-                        Keyword = GetKeywordValue(conditionSet[1])
-                    };
-                    break;
-                case "HasPerk":
-                    cond = new HasPerk()
-                    {
-                        condition = conditionName,
-                        negated = isNegated,
-                        Perk = GetPluginValue(conditionSet[1])
-                    };
-                    break;
-                case "HasSpell":
-                    cond = new HasSpell()
-                    {
-                        condition = conditionName,
-                        negated = isNegated,
-                        Spell = GetPluginValue(conditionSet[1])
                     };
                     break;
                 case "IsRace":
@@ -294,14 +309,6 @@ namespace DARtoOAR
                         VoiceType = GetPluginValue(conditionSet[1])
                     };
                     break;
-                case "HasRefType":
-                    cond = new HasRefType()
-                    {
-                        condition = conditionName,
-                        negated = isNegated,
-                        LocationRefType = GetPluginValue(conditionSet[1])
-                    };
-                    break;
                 case "IsParentCell":
                     cond = new IsParentCell()
                     {
@@ -318,6 +325,105 @@ namespace DARtoOAR
                         Worldspace = GetPluginValue(conditionSet[1])
                     };
                     break;
+                case "IsMovementDirection":
+                    cond = new NumericComparison()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
+                    };
+                    break;
+                case "IsInLocation":
+                    cond = new IsInLocation()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Location = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "IsWorn":
+                    cond = new IsWorn()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Form = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "IsWornHasKeyword":
+                    cond = new IsWornHasKeyword()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Keyword = GetKeywordValue(conditionSet[1])
+                    };
+                    break;
+                case "HasKeyword":
+                    cond = new HasKeyword
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Keyword = GetKeywordValue(conditionSet[1])
+                    };
+                    break;
+                case "HasPerk":
+                    cond = new HasPerk()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Perk = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "HasSpell":
+                    cond = new HasSpell()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Spell = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "HasMagicEffect":
+                    cond = new HasMagicEffect()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        magicEffect = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "HasMagicEffectWithKeyword":
+                    cond = new HasMagicEffectWithKeyword
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Keyword = GetKeywordValue(conditionSet[1])
+                    };
+                    break;
+                case "HasRefType":
+                    cond = new HasRefType()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        LocationRefType = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "Random":
+                    cond = new RandomCondition()
+                    {
+                        condition = conditionName,
+                        negated = isNegated,
+                        Comparison = "<=",
+                        randomValue = new RandomValue() { min = 0, max = 1 },
+                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
+                    };
+                    break;
+                case "CurrentGameTimeLessThan":
+                    cond = new NumericComparison()
+                    {
+                        condition = "CurrentGameTime",
+                        negated = isNegated,
+                        Comparison = "<",
+                        numericValue = new NumericValue() { value = float.Parse(conditionSet[1]) }
+                    };
+                    break;
                 default:
                     LOGGER.Warn($"Condition({conditionName}) has no explicit mapping.");
                     cond = new Condition()
@@ -332,19 +438,38 @@ namespace DARtoOAR
         private static List<Condition> parseConditions(string[] conditions)
         {
             List<Condition> result = new List<Condition>();
+            OR? or = null;
             foreach (string condition in conditions)
             {
                 string cleaned = condition.Replace(" ", "");
                 bool isNegated = false;
-
+                if(cleaned.EndsWith("OR"))
+                {
+                    if(or == null) { 
+                        or = new OR();
+                        result.Add(or);
+                    }
+                    cleaned = cleaned.Replace("OR", "");
+                }
+                else
+                {
+                    or = null;
+                }
                 if (cleaned.StartsWith("NOT"))
                 {
                     isNegated = true;
                     cleaned = cleaned.Replace("NOT", "");
+                    
                 }
-                result.Add(parseCondition(cleaned, isNegated));
-
-
+                if(or != null)
+                {
+                    or.conditions.Add(parseCondition(cleaned, isNegated));
+                }
+                else
+                {
+                    result.Add(parseCondition(cleaned, isNegated));
+                }
+                
             }
             return result;
         }
