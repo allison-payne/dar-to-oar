@@ -467,7 +467,7 @@ namespace DARtoOAR
                 {
                     if (or != null && orConditions != null)
                     {
-                        or.conditions = orConditions.ToArray();
+                        or.Conditions = orConditions.ToArray();
                     }
                     or = null;
                     orConditions = null;

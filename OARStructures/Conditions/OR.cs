@@ -8,12 +8,12 @@ namespace DARtoOAR.OARStructures.Conditions
 {
     internal class OR : Condition
     {
-        public object[] conditions { get; set; }
+        public object[] Conditions { get; set; }
 
         public OR()
         {
             this.condition = "OR";
-            this.conditions = new object[0];
+            this.Conditions = new object[0];
         }
     }
 }
