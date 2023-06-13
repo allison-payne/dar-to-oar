@@ -1,12 +1,7 @@
-﻿using DARtoOAR.OARStructures.Values;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using oar_explorer.OARStructures.Values;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
-namespace DARtoOAR.OARStructures.Conditions
+namespace oar_explorer.OARStructures.Conditions
 {
     internal class IsEquippedType:Condition
     {

@@ -1,4 +1,4 @@
-﻿namespace DARtoOAR.OARStructures.Values
+﻿namespace oar_explorer.OARStructures.Values
 {
     internal class RandomValue
     {

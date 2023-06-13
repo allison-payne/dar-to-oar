@@ -1,6 +1,6 @@
-﻿using DARtoOAR.OARStructures.Values;
+﻿using oar_explorer.OARStructures.Values;
 
-namespace DARtoOAR.OARStructures.Conditions
+namespace oar_explorer.OARStructures.Conditions
 {
     internal class HasKeyword : Condition
     {

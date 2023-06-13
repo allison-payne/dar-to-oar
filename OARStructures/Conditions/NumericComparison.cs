@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using DARtoOAR.OARStructures.Values;
+﻿using System.Text.Json.Serialization;
+using oar_explorer.OARStructures.Values;
 
-namespace DARtoOAR.OARStructures.Conditions
+namespace oar_explorer.OARStructures.Conditions
 {
     internal class NumericComparison: Condition
     {

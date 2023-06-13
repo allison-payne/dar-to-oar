@@ -1,14 +1,8 @@
-﻿using DARtoOAR.OARStructures.Values;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
-namespace DARtoOAR.OARStructures.Conditions
+namespace oar_explorer.OARStructures.Conditions
 {
-    internal class CompareValues:Condition
+    internal class CompareValues : Condition
     {
         [JsonPropertyName("Value A")]
         public object? valueA { get; set; }
