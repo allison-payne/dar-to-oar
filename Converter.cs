@@ -159,7 +159,7 @@ namespace DARtoOAR
                         valueA = new ActorValue()
                         {
                             actorValue = int.Parse(values[0]),
-                            actorValueType = "Percentage"
+                            actorValueType = "Max"
                         },
                         Comparison = "<",
                         valueB = new NumericValue() { value = float.Parse(values[1]) }
@@ -189,7 +189,7 @@ namespace DARtoOAR
                         valueA = new ActorValue()
                         {
                             actorValue = int.Parse(values[0]),
-                            actorValueType = "Max"
+                            actorValueType = "Percentage"
                         },
                         Comparison = "<",
                         valueB = new NumericValue() { value = float.Parse(values[1]) }
