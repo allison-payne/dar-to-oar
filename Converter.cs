@@ -449,12 +449,14 @@ namespace DARtoOAR
             List<Condition> result = new List<Condition>();
             List<Condition>? orConditions = null;
             OR? or = null;
+            bool inOrLoop = false;
             foreach (string condition in conditions)
             {
                 string cleaned = condition.Replace(" ", "");
                 bool isNegated = false;
                 if (cleaned.EndsWith("OR"))
                 {
+                    inOrLoop = true;
                     if (or == null && orConditions == null)
                     {
                         orConditions = new List<Condition>();
@@ -465,12 +467,8 @@ namespace DARtoOAR
                 }
                 else
                 {
-                    if (or != null && orConditions != null)
-                    {
-                        or.Conditions = orConditions.ToArray();
-                    }
-                    or = null;
-                    orConditions = null;
+                    inOrLoop = false;
+
                 }
                 if (cleaned.StartsWith("NOT"))
                 {
@@ -480,6 +478,12 @@ namespace DARtoOAR
                 if (or != null && orConditions != null)
                 {
                     orConditions.Add(parseCondition(cleaned, isNegated));
+                    if (!inOrLoop)
+                    {
+                        or.Conditions = orConditions.ToArray();
+                        or = null;
+                        orConditions = null;
+                    }
                 }
                 else
                 {
