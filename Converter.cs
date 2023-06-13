@@ -233,6 +233,22 @@ namespace DARtoOAR
                         numericValue = new NumericValue() { value = float.Parse(values[1]) }
                     };
                     break;
+                case "IsEquippedRight":
+                    cond = new IsEquipped
+                    {
+                        condition = "IsEquippedRight",
+                        negated = isNegated,
+                        Form = GetPluginValue(conditionSet[1])
+                    };
+                    break;
+                case "IsEquippedLeft":
+                    cond = new IsEquipped
+                    {
+                        condition = "IsEquippedLeft",
+                        negated = isNegated,
+                        Form = GetPluginValue(conditionSet[1])
+                    };
+                    break;
                 case "IsEquippedRightType":
                 case "IsEquippedLeftType":
                     cond = new IsEquippedType
@@ -516,7 +532,8 @@ namespace DARtoOAR
                 if (darActorFolder.GetDirectories("_1stperson").Length > 0)
                 {
                     string oar1stPersonConfigPath = Path.Combine(ACTOR_FOLDER, darActorFolder.Name, FIRST_PERSON_FOLDER, ANIMATION_FOLDER, OAR_FOLDER);
-                    DirectoryInfo oarAnimations1stPersonFolder = await BuildOARDirectory(darActorFolder, oarModFolder, oar1stPersonConfigPath, true, modName, modAuthor);
+                    DirectoryInfo firstPersonDARDirectory = new DirectoryInfo(Path.Combine(darActorFolder.FullName, FIRST_PERSON_FOLDER));
+                    DirectoryInfo oarAnimations1stPersonFolder = await BuildOARDirectory(firstPersonDARDirectory, oarModFolder, oar1stPersonConfigPath, true, modName, modAuthor);
                     animationsDirectories.Add(oarAnimations1stPersonFolder);
                 }
 
