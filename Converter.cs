@@ -52,7 +52,7 @@ namespace DARtoOAR
             string conditionName = conditionSet[0];
             Condition cond;
             string[] values;
-            LOGGER.Debug($"Parsing -> condition: {conditionName}");
+            LOGGER.Info($"Parsing -> condition: {conditionName}");
             switch (conditionName)
             {
                 case "ValueEqualTo":
@@ -449,36 +449,27 @@ namespace DARtoOAR
             List<Condition> result = new List<Condition>();
             List<Condition>? orConditions = null;
             OR? or = null;
-            bool inOrLoop = false;
+
             foreach (string condition in conditions)
-            {
-                string cleaned = condition.Replace(" ", "");
-                bool isNegated = false;
-                if (cleaned.EndsWith("OR"))
+            {   
+                bool isNegated = condition.StartsWith("NOT");
+                bool isOR = condition.EndsWith("OR");
+                string cleaned = condition.Replace("NOT", "").Replace("OR", "").Replace("AND","").Trim();
+
+                if (isOR)
                 {
-                    inOrLoop = true;
                     if (or == null && orConditions == null)
                     {
                         orConditions = new List<Condition>();
                         or = new OR();
                         result.Add(or);
                     }
-                    cleaned = cleaned.Replace("OR", "");
                 }
-                else
-                {
-                    inOrLoop = false;
 
-                }
-                if (cleaned.StartsWith("NOT"))
-                {
-                    isNegated = true;
-                    cleaned = cleaned.Replace("NOT", "");
-                }
                 if (or != null && orConditions != null)
                 {
                     orConditions.Add(parseCondition(cleaned, isNegated));
-                    if (!inOrLoop)
+                    if (!isOR)
                     {
                         or.Conditions = orConditions.ToArray();
                         or = null;
@@ -489,7 +480,6 @@ namespace DARtoOAR
                 {
                     result.Add(parseCondition(cleaned, isNegated));
                 }
-
             }
             return result;
         }
@@ -499,7 +489,7 @@ namespace DARtoOAR
             MainConfig mc = new MainConfig()
             {
                 author = author,
-                name = $"{(String.IsNullOrEmpty(modName) ? oarModFolder.Name : modName)}-{darActorFolder.Name}",
+                name = $"{(String.IsNullOrEmpty(modName) ? oarModFolder.Name : modName)}",
                 description = ""
             };
 

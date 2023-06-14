@@ -14,7 +14,7 @@ namespace DARtoOAR
             LoggingConfiguration config = new LoggingConfiguration();
 
             // create a console logging target
-            var logTarget = new NLog.Targets.FileTarget() { FileName = "${basedir}\\DARtoOAR.log", ArchiveOldFileOnStartup = true };
+            var logTarget = new NLog.Targets.FileTarget() { FileName = "${basedir}\\DARtoOAR.log", ArchiveOldFileOnStartup = true, DeleteOldFileOnStartup = true };
 
             // send logs with levels from Info to Fatal to the console
             config.AddRule(NLog.LogLevel.Debug, NLog.LogLevel.Fatal, logTarget);
