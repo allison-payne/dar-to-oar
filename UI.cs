@@ -53,8 +53,11 @@ namespace DARtoOAR
 
         private void darModFolderPath_TextChanged(object sender, EventArgs e)
         {
-            oarModFolderPath.Text = darModFolderPath.Text;
-            modName.Text = new DirectoryInfo(oarModFolderPath.Text).Name;
+            if (!String.IsNullOrEmpty(darModFolderPath.Text))
+            {
+                oarModFolderPath.Text = darModFolderPath.Text;
+                modName.Text = new DirectoryInfo(oarModFolderPath.Text).Name;
+            }
         }
     }
 }
