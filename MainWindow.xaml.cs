@@ -12,6 +12,7 @@ using System.Collections.ObjectModel;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Newtonsoft.Json;
+using System.Windows.Media.Animation;
 
 namespace oar_explorer
 {
@@ -22,6 +23,8 @@ namespace oar_explorer
     {
 
         private ObservableCollection<SubmodConfig> submodConfigs;
+        private ProjectConfig? projectConfig;
+        private DirectoryInfo[]? submodStructure;
 
         public MainWindow()
         {
@@ -50,25 +53,30 @@ namespace oar_explorer
             }
         }
 
+        private void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
         private void loadConditionFiles(string folderPath)
         {
-            folderPath += "\\meshes\\actors\\character\\animations\\";
-            bool darDirectoryExists = Directory.Exists(folderPath + "DynamicAnimationReplacer");
-            bool oarDirectoryExists = Directory.Exists(folderPath + "OpenAnimationReplacer");
+            var animationReplacerDirectory = new DirectoryInfo(@$"{folderPath}\{PathConstants.MESHES}")
+                .GetDirectories("*", SearchOption.AllDirectories)
+                .First(arg => arg.FullName.Contains(PathConstants.DAR_FOLDER) || arg.FullName.Contains(PathConstants.OAR_FOLDER));
 
             submodConfigs = new ObservableCollection<SubmodConfig>();
             lvSubmods.ItemsSource = submodConfigs;
 
-            DirectoryInfo[] directories;
-
-            if (darDirectoryExists)
+            if (animationReplacerDirectory.Name == PathConstants.DAR_FOLDER)
             {
-                directories = new DirectoryInfo(folderPath + "DynamicAnimationReplacer\\" + "_CustomConditions\\").GetDirectories();
-                txtImportPath.Text = folderPath + "DynamicAnimationReplacer\\" + "_CustomConditions\\";
+                var darDirectory = new DirectoryInfo(@$"{animationReplacerDirectory.FullName}\{PathConstants.DAR_CONDITIONS}");
+                txtImportPath.Text = darDirectory.FullName;
+                var directories = darDirectory.GetDirectories();
+
                 foreach (var directory in directories)
                 {
-                    SubmodConfig submodConfig = new ();
-                    var lines = File.ReadAllLines(directory.FullName + "\\_conditions.txt").Where(arg => !string.IsNullOrWhiteSpace(arg)).ToArray();
+                    SubmodConfig submodConfig = new();
+                    var lines = File.ReadAllLines(@$"{directory.FullName}\{PathConstants.DAR_CONFIG_NAME}").Where(arg => !string.IsNullOrWhiteSpace(arg)).ToArray();
 
                     submodConfig.name = directory.Name;
                     submodConfig.priority = int.Parse(directory.Name);
@@ -76,26 +84,66 @@ namespace oar_explorer
 
                     submodConfigs.Add(submodConfig);
                 }
-            } else if (oarDirectoryExists)
+
+                projectConfig = new ProjectConfig()
+                {
+                    name = new DirectoryInfo(folderPath).Name,
+                    description = "",
+                    author = ""
+                };
+
+            }
+            else if (animationReplacerDirectory.Name == PathConstants.OAR_FOLDER)
             {
-                directories = new DirectoryInfo(folderPath + "OpenAnimationReplacer\\").GetDirectories();
+                var oarDirectory = new DirectoryInfo(@$"{animationReplacerDirectory.FullName}");
+                txtImportPath.Text = oarDirectory.FullName;
+                var directories = oarDirectory.GetDirectories();
 
                 foreach (var directory in directories)
                 {
                     var submodDirectories = directory.GetDirectories();
-                    txtImportPath.Text = directory.FullName;
-                    txtOutputPath.Text = directory.FullName;
 
                     foreach (var submodDirectory in submodDirectories)
                     {
-                        SubmodConfig submodConfig = new();
-                        submodConfig = JsonConvert.DeserializeObject<SubmodConfig>(File.ReadAllText(submodDirectory.FullName + "\\config.json"));
+                        var submodConfig = JsonConvert.DeserializeObject<SubmodConfig>(File.ReadAllText($@"{submodDirectory.FullName}\{PathConstants.OAR_CONFIG_NAME}"));
                         submodConfigs.Add(submodConfig);
                     }
-
                 }
+
+                projectConfig = JsonConvert.DeserializeObject<ProjectConfig>(File.ReadAllText($@"{oarDirectory.FullName}\{PathConstants.OAR_CONFIG_NAME}"));
+
             }
-            
+
         }
+
+        private void SaveOARStructure()
+        {
+            var folderPath = txtImportPath.Text;
+
+            if (folderPath.Contains(PathConstants.DAR_FOLDER))
+            {
+                folderPath = folderPath.Replace(@$"\{PathConstants.DAR_CONDITIONS}", "").Replace(PathConstants.DAR_FOLDER, PathConstants.OAR_FOLDER);
+                folderPath += @$"\{projectConfig.name}";
+                Directory.CreateDirectory(folderPath.Replace(@$"\{PathConstants.DAR_CONDITIONS}", "").Replace(PathConstants.DAR_FOLDER, PathConstants.OAR_FOLDER) + @$"\{projectConfig.name}");
+            }
+        }
+
+        private void CreateProjectConfigFile()
+        {
+            var folderPath = txtImportPath.Text;
+
+
+        }
+
+        private void CreateSubmodConfigFiles()
+        {
+            foreach (var submod in submodStructure)
+            {
+                var writer = File.CreateText(submod.FullName);
+                writer.Write(JsonConvert.SerializeObject)
+            }
+        }
+
+
     }
 }

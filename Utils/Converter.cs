@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace oar_explorer.Utils
 {
-    internal class Converter
+    internal static class Converter
     {
         private static string ACTOR_FOLDER = @"meshes\actors";
         private static string FIRST_PERSON_FOLDER = "_1stperson";

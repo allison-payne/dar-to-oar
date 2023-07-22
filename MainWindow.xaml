@@ -29,7 +29,7 @@
             </Grid.ColumnDefinitions>
 
             <Button x:Name="btnImport" Grid.Column="0" Width="120" Height="30" Click="btnImport_Click">Import</Button>
-            <Button x:Name="btnConvert" Grid.Column="3" Width="120" Height="30">Save</Button>
+            <Button x:Name="btnSave" Grid.Column="3" Width="120" Height="30" Click="btnSave_Click">Save</Button>
         </Grid>
 
         <Grid Grid.Row="2" Grid.Column="0">
